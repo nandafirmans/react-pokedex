@@ -1,4 +1,4 @@
-import { Button, Card, Col, Layout, message, Row } from "antd";
+import { Button, Card, Col, Layout, message, Row, Space, Tag } from "antd";
 import { Header } from "antd/lib/layout/layout";
 import { useEffect, useState } from "react";
 import "./App.css";
@@ -7,9 +7,7 @@ const { Content } = Layout;
 
 const useFetchPokemon = () => {
     const [pokemons, setPokemons] = useState([]);
-    const [nextPage, setNextPage] = useState(
-        "https://pokeapi.co/api/v2/pokemon"
-    );
+    const [nextPage, setNextPage] = useState();
     const [loading, setLoading] = useState(false);
 
     const fetchPokemons = async (url) => {
@@ -32,7 +30,7 @@ const useFetchPokemon = () => {
     };
 
     useEffect(() => {
-        fetchPokemons(nextPage);
+        fetchPokemons("https://pokeapi.co/api/v2/pokemon");
     }, []);
 
     return {
@@ -54,10 +52,13 @@ function PokemonCard({ pokemon }) {
 
         try {
             const response = await fetch(url);
-            const { sprites } = (await response.json()) || {};
+            const { sprites, types } = (await response.json()) || {};
             const image = sprites?.other?.home?.front_default;
 
-            setPokemonData({ image });
+            setPokemonData({
+                image,
+                types: types?.map((i) => i.type.name),
+            });
         } catch (e) {
             console.error(e);
             message.error(e?.message);
@@ -89,6 +90,14 @@ function PokemonCard({ pokemon }) {
             }
         >
             <Card.Meta title={name} />
+
+            {pokemonData?.types && (
+                <Space size="small">
+                    {pokemonData.types.map((i) => (
+                        <Tag key={i}>{i}</Tag>
+                    ))}
+                </Space>
+            )}
         </Card>
     );
 }
